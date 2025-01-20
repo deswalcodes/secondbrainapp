@@ -1,1 +1,1 @@
-export const JWT_PASSWORD = "klsdbvh"
+export const JWT_PASSWORD = ""
