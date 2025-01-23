@@ -19,6 +19,9 @@ const app = (0, express_1.default)();
 app.use(express_1.default.json());
 const config_1 = require("./config");
 const middleware_1 = require("./middleware");
+const util_1 = require("./util");
+const cors_1 = __importDefault(require("cors"));
+app.use((0, cors_1.default)());
 app.post("/api/v1/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const username = req.body.username;
     const password = req.body.password;
@@ -94,8 +97,43 @@ app.delete("/api/v1/content", middleware_1.userMiddleware, (req, res) => __await
         message: "deleted successfully"
     });
 }));
-app.post("/api/v1/brain/share", (req, res) => {
-});
-app.get("/api/v1/brain/:shareLink", (req, res) => {
-});
+app.post("/api/v1/brain/share", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const share = req.body.share;
+    const hash = (0, util_1.random)(10);
+    if (share) {
+        yield db_1.LinkModel.create({
+            //@ts-ignore
+            userId: req.userId,
+            hash: hash
+        });
+    }
+    else {
+        yield db_1.LinkModel.deleteOne({
+            //@ts-ignore
+            userId: req.userId
+        });
+    }
+    res.json({
+        message: "/share/" + hash
+    });
+}));
+app.get("/api/v1/brain/:shareLink", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const hash = req.params.shareLink;
+    const link = yield db_1.LinkModel.findOne({
+        hash
+    });
+    if (!link) {
+        res.status(411).json({
+            message: "Sorry Incorrect Input"
+        });
+        return;
+    }
+    const content = yield db_1.ContentModel.find({
+        //@ts-ignore
+        userId: link.userId
+    });
+    res.json({
+        content
+    });
+}));
 app.listen(3000);

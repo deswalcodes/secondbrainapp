@@ -7,7 +7,7 @@ exports.userMiddleware = userMiddleware;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const config_1 = require("./config");
 function userMiddleware(req, res, next) {
-    const header = req.headers["authorisation"];
+    const header = req.headers["authorization"];
     const decoded = jsonwebtoken_1.default.verify(header, config_1.JWT_PASSWORD);
     if (decoded) {
         //@ts-ignore

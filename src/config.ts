@@ -1,1 +1,1 @@
-export const JWT_PASSWORD = ""
+export const JWT_PASSWORD = "sqlkdnc"

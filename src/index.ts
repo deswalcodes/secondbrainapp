@@ -7,7 +7,8 @@ app.use(express.json());
 import { JWT_PASSWORD } from './config';
 import { userMiddleware } from './middleware';
 import { random } from './util';
-
+import cors from "cors"
+app.use(cors())
 
 
 app.post("/api/v1/signin",async (req,res) => {
@@ -24,6 +25,7 @@ app.post("/api/v1/signin",async (req,res) => {
         res.json({
             token
         })
+       
     }
     else{
         res.status(403).json({
@@ -117,11 +119,12 @@ app.delete("/api/v1/content",userMiddleware,async(req,res) => {
 
 app.post("/api/v1/brain/share",userMiddleware,async(req,res) => {
     const share = req.body.share;
+    const hash = random(10) 
     if(share){
         await LinkModel.create({
             //@ts-ignore
             userId : req.userId,
-            hash : random(10)
+            hash : hash
 
         })
         
@@ -134,7 +137,7 @@ app.post("/api/v1/brain/share",userMiddleware,async(req,res) => {
         })
     }
     res.json({
-        message : "Updated Shareable Link"
+        message : "/share/" + hash
     })
 
     
@@ -143,8 +146,28 @@ app.post("/api/v1/brain/share",userMiddleware,async(req,res) => {
 
 
 
-app.get("/api/v1/brain/:shareLink",(req,res) => {
+app.get("/api/v1/brain/:shareLink",async(req,res) => {
+    const hash = req.params.shareLink;
+    const link =  await LinkModel.findOne({
+        hash
+    })
+    if(!link){
+        res.status(411).json({
+            message : "Sorry Incorrect Input"
+        })
+        return;
+    }
     
+    const content = await ContentModel.find({
+            //@ts-ignore
+            userId : link.userId
+        })
+        res.json({
+            content
+        })
+    
+
+
 
 })
 
